@@ -116,7 +116,7 @@
       "tags": ["Proxmox VE", "Ceph", "NFS", "HA"]
     }
   ],
-
+  /*
   "strategy": {
     "title": "3-2-1 Storage Strategy",
     "items": [
@@ -127,4 +127,5 @@
       { "icon": "🔁", "bold": "ZFS replication", "text": "between primary → secondary" }
     ]
   }
+  */
 }
