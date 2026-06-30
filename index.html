@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saff // Homelab Inventory</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0D1117;
+    --surface:   #161B22;
+    --border:    #21262D;
+    --muted:     #484F58;
+    --text:      #C9D1D9;
+    --head:      #E6EDF3;
+    --blue:      #58A6FF;
+    --green:     #3FB950;
+    --orange:    #F78166;
+    --yellow:    #E3B341;
+    --purple:    #BC8CFF;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 32px 24px 64px;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .site-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .site-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--head);
+    letter-spacing: -0.02em;
+  }
+  .site-name span { color: var(--blue); }
+  .header-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* ── Layout ── */
+  .main { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+  /* ── Section label ── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .section-label .icon { font-size: 14px; }
+  .section-label .title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .section-label .line { flex: 1; height: 1px; background: var(--border); }
+  .blue  .title { color: var(--blue); }
+  .green .title { color: var(--green); }
+  .orange .title { color: var(--orange); }
+  .yellow .title { color: var(--yellow); }
+
+  /* ── Card grid ── */
+  .card-row { display: grid; gap: 14px; }
+  .card-row.cols-1 { grid-template-columns: 1fr; }
+  .card-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── Device card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .card:hover { border-color: var(--muted); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .card-title { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--head); }
+  .card-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* ── LED indicator ── */
+  .led { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .led.on  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2.4s ease-in-out infinite; }
+  .led.off { background: var(--muted); }
+  .led.plan { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse 3s ease-in-out infinite; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ── Spec rows ── */
+  .specs { padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 24px; }
+  .specs.single-col { grid-template-columns: 1fr; }
+  .spec-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: baseline; }
+  .spec-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .spec-val { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text); }
+  .spec-val.accent-blue   { color: var(--blue); }
+  .spec-val.accent-green  { color: var(--green); }
+  .spec-val.accent-orange { color: var(--orange); }
+  .spec-val.accent-yellow { color: var(--yellow); }
+  .spec-val.accent-purple { color: var(--purple); }
+
+  /* ── OS badge ── */
+  .badge {
+    display: inline-block; padding: 1px 7px; border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+    border: 1px solid;
+  }
+  .badge.win      { color: #4FC3F7; border-color: #4FC3F7; }
+  .badge.truenas  { color: var(--green); border-color: var(--green); }
+  .badge.proxmox  { color: var(--orange); border-color: var(--orange); }
+  .badge.planned  { color: var(--yellow); border-color: var(--yellow); }
+
+  /* ── Use case tag ── */
+  .use-case-bar {
+    padding: 8px 16px; border-top: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    font-size: 11px; color: var(--muted);
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .tag {
+    display: inline-block; background: var(--border); border-radius: 4px;
+    padding: 1px 6px; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--text);
+  }
+
+  /* ── Network card ── */
+  .net-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .net-card-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+    color: var(--orange); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .net-device {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .net-device:last-child { border-bottom: none; padding-bottom: 0; }
+  .net-device:first-child { padding-top: 0; }
+  .net-name { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--head); }
+  .net-desc { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .net-speed { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  .net-speed.blue { color: var(--blue); }
+  .net-speed.green { color: var(--green); }
+  .net-speed.muted { color: var(--muted); }
+
+  /* ── Strategy card ── */
+  .strategy-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .strategy-title {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+    color: var(--yellow); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
+  }
+  .strategy-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .strategy-row:last-child { border-bottom: none; }
+  .strategy-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .strategy-text { color: var(--text); line-height: 1.5; }
+  .strategy-text strong { color: var(--head); font-weight: 600; }
+
+  /* ── Error / loading state ── */
+  .state-msg {
+    max-width: 1100px; margin: 80px auto; text-align: center;
+    font-family: 'JetBrains Mono', monospace; color: var(--muted); font-size: 12px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .card-row.cols-2 { grid-template-columns: 1fr; }
+    .specs { grid-template-columns: 1fr; }
+    .site-header { flex-direction: column; align-items: flex-start; }
+    .header-meta { text-align: left; }
+  }
+  @media (max-width: 480px) {
+    body { padding: 20px 16px 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="state-msg">Loading inventory…</div>
+</div>
+
+<script>
+const BADGE_CLASS = { win: 'win', truenas: 'truenas', proxmox: 'proxmox', planned: 'planned' };
+const LED_CLASS = { on: 'on', off: 'off', plan: 'plan' };
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderDeviceCard(d) {
+  const accents = d.accents || {};
+  const specRows = Object.entries(d.specs || {}).map(([k, v]) => {
+    const accentClass = accents[k] ? `accent-${accents[k]}` : '';
+    return `<div class="spec-row">
+      <span class="spec-key">${esc(k)}</span>
+      <span class="spec-val ${accentClass}">${esc(v)}</span>
+    </div>`;
+  }).join('');
+
+  const tagsHtml = (d.tags && d.tags.length)
+    ? `<div class="use-case-bar">${d.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>`
+    : '';
+
+  const badgeClass = BADGE_CLASS[d.osType] || 'planned';
+  const ledClass = LED_CLASS[d.status] || 'off';
+  const singleCol = Object.keys(d.specs || {}).length <= 1 ? 'single-col' : '';
+
+  return `
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">${esc(d.name)}</div>
+        ${d.subtitle ? `<div class="card-subtitle">${esc(d.subtitle)}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${d.os ? `<span class="badge ${badgeClass}">${esc(d.os)}</span>` : ''}
+        <span class="led ${ledClass}"></span>
+      </div>
+    </div>
+    <div class="specs ${singleCol}">${specRows}</div>
+    ${tagsHtml}
+  </div>`;
+}
+
+function renderNetDevice(n) {
+  const speedColor = n.speedColor || '';
+  const ledClass = LED_CLASS[n.status] || 'off';
+  return `
+  <div class="net-device">
+    <div>
+      <div class="net-name">${esc(n.name)}</div>
+      ${n.desc ? `<div class="net-desc">${esc(n.desc)}</div>` : ''}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      ${n.speed ? `<span class="net-speed ${speedColor}">${esc(n.speed)}</span>` : ''}
+      <span class="led ${ledClass}"></span>
+    </div>
+  </div>`;
+}
+
+function renderStrategy(strategy) {
+  if (!strategy) return '';
+  const rows = strategy.items.map(i => `
+    <div class="strategy-row">
+      <span class="strategy-icon">${i.icon}</span>
+      <div class="strategy-text"><strong>${esc(i.bold)}</strong> ${esc(i.text)}</div>
+    </div>`).join('');
+  return `
+  <div class="strategy-card">
+    <div class="strategy-title">${esc(strategy.title)}</div>
+    ${rows}
+  </div>`;
+}
+
+function renderSection(iconEmoji, label, colorClass, innerHtml) {
+  return `
+  <section>
+    <div class="section-label ${colorClass}">
+      <span class="icon">${iconEmoji}</span>
+      <span class="title">${esc(label)}</span>
+      <div class="line"></div>
+    </div>
+    ${innerHtml}
+  </section>`;
+}
+
+function render(data) {
+  const meta = data.meta || {};
+  const allDevices = [...(data.workstation||[]), ...(data.nas||[]), ...(data.planned||[])];
+  const onlineCount = allDevices.filter(d => d.status === 'on').length;
+  const plannedCount = allDevices.filter(d => d.status === 'plan').length;
+
+  const header = `
+  <header class="site-header">
+    <div>
+      <div class="site-title">${esc(meta.subtitle || 'Hardware Manifest')}</div>
+      <div class="site-name">${esc((meta.title || 'Homelab').replace(/'s$/, ''))}<span>'s</span> Homelab</div>
+    </div>
+    <div class="header-meta">
+      Updated: ${esc(meta.lastUpdated || '')}<br>
+      Nodes: ${onlineCount} active · ${plannedCount} planned<br>
+      Network: 10GbE fabric
+    </div>
+  </header>`;
+
+  const workstationHtml = (data.workstation && data.workstation.length)
+    ? renderSection('🖥️', 'Personal Workstation', 'blue',
+        `<div class="card-row cols-1">${data.workstation.map(renderDeviceCard).join('')}</div>`)
+    : '';
+
+  const nasHtml = (data.nas && data.nas.length)
+    ? renderSection('🗄️', 'NAS / Storage Systems', 'green',
+        `<div class="card-row cols-2">${data.nas.map(renderDeviceCard).join('')}</div>`)
+    : '';
+
+  const switchesHtml = (data.switches || []).map(renderNetDevice).join('');
+  const internetHtml = (data.internet || []).map(renderNetDevice).join('');
+  const networkHtml = renderSection('🌐', 'Network / Infrastructure', 'orange', `
+    <div class="card-row cols-2">
+      <div class="net-card">
+        <div class="net-card-title">Switching</div>
+        ${switchesHtml}
+      </div>
+      <div class="net-card">
+        <div class="net-card-title">Internet &amp; Access</div>
+        ${internetHtml}
+      </div>
+    </div>`);
+
+  const plannedHtml = (data.planned && data.planned.length)
+    ? renderSection('🧪', 'Planned &amp; Future', 'yellow', `
+        <div class="card-row cols-2">
+          <div class="card-row cols-1">${data.planned.map(renderDeviceCard).join('')}</div>
+          ${renderStrategy(data.strategy)}
+        </div>`)
+    : '';
+
+  document.getElementById('app').innerHTML = `
+    ${header}
+    <main class="main">
+      ${workstationHtml}
+      ${nasHtml}
+      ${networkHtml}
+      ${plannedHtml}
+    </main>`;
+}
+
+fetch('data.json')
+  .then(res => {
+    if (!res.ok) throw new Error('Could not load data.json (HTTP ' + res.status + ')');
+    return res.json();
+  })
+  .then(render)
+  .catch(err => {
+    document.getElementById('app').innerHTML = `
+      <div class="state-msg">
+        ⚠️ Failed to load inventory data.<br><br>
+        ${esc(err.message)}<br><br>
+        Make sure <code>data.json</code> is in the same folder as this page.
+      </div>`;
+  });
+</script>
+
+</body>
+</html>

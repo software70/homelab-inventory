@@ -1,0 +1,130 @@
+{
+  "meta": {
+    "title": "Saff's Homelab",
+    "subtitle": "Hardware Manifest",
+    "lastUpdated": "2026-06-30"
+  },
+
+  "workstation": [
+    {
+      "name": "Main Desktop",
+      "subtitle": "Primary workstation · daily driver",
+      "os": "Windows 10",
+      "osType": "win",
+      "status": "on",
+      "specs": {
+        "CPU": "Ryzen 9 3950X",
+        "GPU": "GTX 1080",
+        "Board": "MSI MAG B550 Tomahawk",
+        "Network": "2.5GbE NIC",
+        "RAM": "32GB DDR4",
+        "Platform": "ATX · AM4"
+      },
+      "accents": { "CPU": "blue", "GPU": "green", "RAM": "purple" },
+      "tags": []
+    }
+  ],
+
+  "nas": [
+    {
+      "name": "Primary NAS",
+      "subtitle": "Main storage · media · apps",
+      "os": "TrueNAS SCALE",
+      "osType": "truenas",
+      "status": "on",
+      "specs": {
+        "CPU": "Ryzen 5 5600G",
+        "Board": "MSI PRO B550-VC (ATX)",
+        "RAM": "128GB DDR4",
+        "Network": "10GbE NIC",
+        "Storage": "12-disk ZFS array"
+      },
+      "accents": { "CPU": "blue", "RAM": "purple", "Network": "green" },
+      "tags": ["Plex", "Docker", "Main Pool", "ZFS"]
+    },
+    {
+      "name": "Secondary NAS",
+      "subtitle": "Backup · replication · failover",
+      "os": "TrueNAS SCALE",
+      "osType": "truenas",
+      "status": "on",
+      "specs": {
+        "CPU": "Ryzen 5 5600G",
+        "Board": "MSI PRO B550M-VC WiFi (mATX)",
+        "RAM": "16GB DDR4",
+        "Network": "10GbE NIC",
+        "Role": "Replication target"
+      },
+      "accents": { "CPU": "blue", "RAM": "purple", "Network": "green" },
+      "tags": ["Backup", "Plex Failover", "Replication"]
+    }
+  ],
+
+  "switches": [
+    {
+      "name": "TP-Link TL-SX1008",
+      "desc": "8-port · Primary switch · High-speed LAN / VM traffic",
+      "speed": "10GbE",
+      "speedColor": "green",
+      "status": "on"
+    },
+    {
+      "name": "TP-Link TL-SX105",
+      "desc": "5-port · Backend / cluster / storage traffic",
+      "speed": "10GbE",
+      "speedColor": "muted",
+      "status": "off"
+    }
+  ],
+
+  "internet": [
+    {
+      "name": "ISP Connection",
+      "desc": "Broadband uplink",
+      "speed": "600 Mbps",
+      "speedColor": "blue",
+      "status": "on"
+    },
+    {
+      "name": "Main Router + Mesh WiFi",
+      "desc": "Primary mesh node",
+      "speed": "",
+      "status": "on"
+    },
+    {
+      "name": "Mesh Node — Office",
+      "desc": "Uplinked to 10GbE switch",
+      "speed": "",
+      "status": "on"
+    }
+  ],
+
+  "planned": [
+    {
+      "name": "Proxmox HA Cluster",
+      "subtitle": "2–3 nodes · planned build",
+      "os": "Planned",
+      "osType": "planned",
+      "status": "plan",
+      "specs": {
+        "Nodes": "2–3 node HA",
+        "Cluster": "Ceph experiments (future)",
+        "Storage": "NFS from NAS (primary)",
+        "Network": "Frontend / backend split"
+      },
+      "accents": { "Nodes": "yellow" },
+      "tags": ["Proxmox VE", "Ceph", "NFS", "HA"]
+    }
+  ],
+
+  "strategy": {
+    "title": "3-2-1 Storage Strategy",
+    "items": [
+      { "icon": "3️⃣", "bold": "3 copies", "text": "of all critical data" },
+      { "icon": "💾", "bold": "2 different media", "text": "— Primary ZFS pool + secondary NAS" },
+      { "icon": "☁️", "bold": "1 offsite", "text": "copy (target)" },
+      { "icon": "📺", "bold": "Plex failover", "text": "— Secondary NAS as hot replication target" },
+      { "icon": "🔁", "bold": "ZFS replication", "text": "between primary → secondary" }
+    ]
+  }
+}
