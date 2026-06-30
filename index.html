@@ -340,17 +340,17 @@ function render(data) {
 
   const switchesHtml = (data.switches || []).map(renderNetDevice).join('');
   const internetHtml = (data.internet || []).map(renderNetDevice).join('');
-  //const networkHtml = renderSection('🌐', 'Network / Infrastructure', 'orange', `
-    //<div class="card-row cols-2">
-      //<div class="net-card">
-        //<div class="net-card-title">Switching</div>
-        //${switchesHtml}
-      //</div>
-      //<div class="net-card">
-        //<div class="net-card-title">Internet &amp; Access</div>
-        //${internetHtml}
-      //</div>
-    //</div>`);
+  const networkHtml = renderSection('🌐', 'Network / Infrastructure', 'orange', `
+    <div class="card-row cols-2">
+      <div class="net-card">
+        <div class="net-card-title">Switching</div>
+        ${switchesHtml}
+      </div>
+      <div class="net-card">
+        <div class="net-card-title">Internet &amp; Access</div>
+        ${internetHtml}
+      </div>
+    </div>`);
 
   const plannedHtml = (data.planned && data.planned.length)
     ? renderSection('🧪', 'Planned &amp; Future', 'yellow', `
